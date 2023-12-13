@@ -46,6 +46,9 @@ class Spot:
 
     def is_start(self):
         return self.color == ORANGE
+    
+    def is_path(self):
+        return self.color == PURPLE
 
     def is_end(self):
         return self.color == TURQUOISE
@@ -122,7 +125,8 @@ def reconstruct_path(came_from, current, draw):
                 moving_on_x = False #rotate the robot
         
         current = came_from[current]
-        current.make_path()
+        if not current.is_start() or current.is_path():
+            current.make_path()
         draw()
     
     print("total_cost: ", total_cost)
@@ -219,27 +223,36 @@ def dijkstra_algorithm(draw, grid, start, end):
         open_set_hash.remove(current)
 
         if current == path_targets[0]:
-            path_targets[0].make_closed()
+            print("targetet talaltunk")
+            reconstruct_path(came_from, current, draw)
+            #path_targets[0].make_closed()
+            for row in grid:
+                    for spot in row:
+                        if not spot.is_obj and not spot.is_end() and not spot.is_start() and not spot.is_path():
+                            if spot.is_closed() or spot.is_open():
+                                spot.reset()
+                                g_score[spot] = float("inf")
             path_targets = sort_targets(current, path_targets[1:])
+            g_score[current] = 0
             if path_targets:
                 open_set = PriorityQueue()
                 open_set.put((0, count, current))
                 open_set_hash = {current}
             else:
-                reconstruct_path(came_from, end, draw)
                 return True
 
         for neighbor in current.neighbors:
-            temp_g_score = g_score[current] + 1
-
-            if temp_g_score < g_score[neighbor]:
-                came_from[neighbor] = current
-                g_score[neighbor] = temp_g_score
-                if neighbor not in open_set_hash:
-                    count += 1
-                    open_set.put((g_score[neighbor], count, neighbor))
-                    open_set_hash.add(neighbor)
-                    neighbor.make_open()
+            if not neighbor.is_path():    
+                temp_g_score = g_score[current] + 1
+                if temp_g_score < g_score[neighbor]:
+                    came_from[neighbor] = current
+                    g_score[neighbor] = temp_g_score
+                    if neighbor not in open_set_hash:
+                        count += 1
+                        open_set.put((g_score[neighbor], count, neighbor))
+                        open_set_hash.add(neighbor)
+                        if not neighbor.is_end():
+                            neighbor.make_open()
 
         draw()
         if current != start and current != path_targets[0]:
