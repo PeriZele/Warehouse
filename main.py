@@ -167,7 +167,14 @@ def a_star_algorithm(draw, grid, start, end):
         current = open_set.get()[2]
         open_set_hash.remove(current)
         if current == path_targets[0]:
-            path_targets[0].make_closed()
+            #path_targets[0].make_closed()
+            reconstruct_path(came_from, current, draw)
+            for row in grid:
+                    for spot in row:
+                        if not spot.is_obj and not spot.is_end() and not spot.is_start() and not spot.is_path():
+                            if spot.is_closed() or spot.is_open():
+                                spot.reset()
+                                g_score[spot] = float("inf")
             path_targets = sort_targets(current, path_targets[1:])
             if path_targets:
                 f_score[current] = h(current.get_pos(), path_targets[0].get_pos())
@@ -177,7 +184,6 @@ def a_star_algorithm(draw, grid, start, end):
                 
 
             else:
-                reconstruct_path(came_from, end, draw)
                 return True
 
         for neighbor in current.neighbors:
@@ -192,7 +198,8 @@ def a_star_algorithm(draw, grid, start, end):
                     count += 1
                     open_set.put((f_score[neighbor], count, neighbor))
                     open_set_hash.add(neighbor)
-                    neighbor.make_open()
+                    if not neighbor.is_end():
+                        neighbor.make_open()
 
         draw()
         if current != start and current != path_targets[0]:
@@ -223,9 +230,7 @@ def dijkstra_algorithm(draw, grid, start, end):
         open_set_hash.remove(current)
 
         if current == path_targets[0]:
-            print("targetet talaltunk")
             reconstruct_path(came_from, current, draw)
-            #path_targets[0].make_closed()
             for row in grid:
                     for spot in row:
                         if not spot.is_obj and not spot.is_end() and not spot.is_start() and not spot.is_path():
