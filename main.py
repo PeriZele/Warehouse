@@ -102,11 +102,31 @@ def h(p1, p2):
     return abs(x1-x2) + abs(y1-y2)
 
 def reconstruct_path(came_from, current, draw):
+    total_cost = 0
+    moving_on_x = None
+    if abs(came_from[current].get_pos()[0] - current.get_pos()[0]) != 0:
+        moving_on_x = False
+    elif abs(came_from[current].get_pos()[1] - current.get_pos()[1]) != 0:
+        moving_on_x = True
+
     while current in came_from:
+        total_cost += 2 #account for the step
+        if abs(came_from[current].get_pos()[0] - current.get_pos()[0]) != 0: #x coordinate change
+            if not moving_on_x:# robot wasn't moving on x
+                total_cost += 1 #account for the rotation
+                moving_on_x = True #rotate the robot
+        elif abs(came_from[current].get_pos()[1] - current.get_pos()[1]) != 0: #y coordinate change
+            if  moving_on_x:# robot wasn't moving on y
+                total_cost += 1 #account for the rotation
+                moving_on_x = False #rotate the robot
+        
         current = came_from[current]
         current.make_path()
         draw()
     
+    print("total_cost: ", total_cost)
+
+
 
 
 def sort_targets(current, targets):
@@ -142,7 +162,6 @@ def a_star_algorithm(draw, grid, start, end):
         current = open_set.get()[2]
         open_set_hash.remove(current)
         if current == path_targets[0]:
-            reconstruct_path(came_from, path_targets[0], draw)
             path_targets[0].make_closed()
             path_targets = sort_targets(current, path_targets[1:])
             if path_targets:
@@ -271,7 +290,6 @@ def main(win, width):
                         for spot in row:
                             spot.update_neighbors(grid)
 
-                    # Note: Pass an empty list for objs since their order will be dynamically determined
                     a_star_algorithm(lambda: draw(win, grid, ROWS, width), grid, start, end)
 
                 if event.key == pygame.K_c:
