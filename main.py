@@ -1,6 +1,7 @@
 import pygame
 import math
 from queue import PriorityQueue
+from collections import deque
 
 
 WIDTH = 800
@@ -169,9 +170,10 @@ def a_star_algorithm(draw, grid, start, end):
                 open_set = PriorityQueue()
                 open_set.put((0, count, current))
                 open_set_hash = {current}
+                
+
             else:
                 reconstruct_path(came_from, end, draw)
-                end.make_end()
                 return True
 
         for neighbor in current.neighbors:
@@ -194,9 +196,91 @@ def a_star_algorithm(draw, grid, start, end):
 
     return False
 
+def dijkstra_algorithm(draw, grid, start, end):
+    count = 0
+    open_set = PriorityQueue()
+    open_set.put((0, count, start))
+    came_from = {}
+    g_score = {spot: float("inf") for row in grid for spot in row}
+    g_score[start] = 0
+
+    open_set_hash = {start}
+
+    obj_spots = [spot for row in grid for spot in row if spot.is_obj]
+
+    path_targets = sort_targets(start, obj_spots + [end])
+
+    while not open_set.empty():
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        current = open_set.get()[2]
+        open_set_hash.remove(current)
+
+        if current == path_targets[0]:
+            path_targets[0].make_closed()
+            path_targets = sort_targets(current, path_targets[1:])
+            if path_targets:
+                open_set = PriorityQueue()
+                open_set.put((0, count, current))
+                open_set_hash = {current}
+            else:
+                reconstruct_path(came_from, end, draw)
+                return True
+
+        for neighbor in current.neighbors:
+            temp_g_score = g_score[current] + 1
+
+            if temp_g_score < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = temp_g_score
+                if neighbor not in open_set_hash:
+                    count += 1
+                    open_set.put((g_score[neighbor], count, neighbor))
+                    open_set_hash.add(neighbor)
+                    neighbor.make_open()
+
+        draw()
+        if current != start and current != path_targets[0]:
+            current.make_closed()
+
+    return False
 
 
+def bfs_algorithm(draw, grid, start, end):
+    queue = deque([start])
+    came_from = {}
+    visited = set([start])
 
+    while queue:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        current = queue.popleft()
+
+        if current == end:
+            reconstruct_path(came_from, end, draw)
+            return True
+
+        for neighbor in current.neighbors:
+            if neighbor not in visited and not neighbor.is_obj:
+                queue.append(neighbor)
+                visited.add(neighbor)
+                came_from[neighbor] = current
+                neighbor.make_open()
+
+        # Check if the current node is an object node
+        if current.is_obj:
+            reconstruct_path(came_from, current, draw)
+            current.make_closed()
+
+        draw()
+        if current != start and not current.is_obj:
+            current.make_closed()
+
+    return False
 
 def make_grid(rows, width):
     grid = []
@@ -303,6 +387,21 @@ def main(win, width):
                     spot = grid[row][col]
                     if not spot.is_start() and not spot.is_end():
                         spot.make_obj()
+
+                if event.key == pygame.K_d and start and end:
+                    for row in grid:
+                        for spot in row:
+                            spot.update_neighbors(grid)
+
+                    dijkstra_algorithm(lambda: draw(win, grid, ROWS, width), grid, start, end)
+
+                if event.key == pygame.K_b and start and end:
+                    for row in grid:
+                        for spot in row:
+                            spot.update_neighbors(grid)
+
+                    bfs_algorithm(lambda: draw(win, grid, ROWS, width), grid, start, end)
+
 
     pygame.quit()
 
