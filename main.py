@@ -265,7 +265,7 @@ def dijkstra_algorithm(draw, grid, start, end):
                             neighbor.make_open()
 
         draw()
-        if current != start and current != path_targets[0]:
+        if current != start and current != path_targets[0] and current != end:
             current.make_closed()
 
     return False
