@@ -340,8 +340,8 @@ def bfs_algorithm(draw, grid, start, end):
             pygame.display.flip()
             wait_for_user_interaction()
             return True
-        
-        # Check if the current node is an object node
+
+
         if current in obj_spots:
             print("objektumot találtunk lelc")
             obj_spots.remove(current)
@@ -466,7 +466,6 @@ def main(win, width):
                     end = None
 
             if event.type == pygame.KEYDOWN:
-            # In the main loop
                 if event.key == pygame.K_SPACE and start and end:
                     for row in grid:
                         for spot in row:
