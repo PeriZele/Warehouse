@@ -2,6 +2,7 @@ import pygame
 import math
 from queue import PriorityQueue
 from collections import deque
+import time
 
 
 WIDTH = 800
@@ -18,6 +19,8 @@ PURPLE = (128, 0, 128)
 ORANGE = (255, 165, 0)
 GREY = (128, 128, 128)
 TURQUOISE = (64, 224, 208)
+
+pygame.font.init()
 
 class Spot:
     def __init__(self, row, col, width, total_rows):
@@ -164,6 +167,7 @@ def a_star_algorithm(draw, grid, start, end):
 
     path_targets = sort_targets(start, obj_spots + [end])
 
+    start_time = time.time()
     while not open_set.empty():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -194,6 +198,13 @@ def a_star_algorithm(draw, grid, start, end):
                 
 
             else:
+                end_time = time.time()
+                elapsed_time = end_time - start_time
+                font = pygame.font.Font(None, 36)
+                text = font.render(f"A*: {elapsed_time:.6f} seconds", True, BLACK)
+                WIN.blit(text, (10, 10))
+                pygame.display.flip()
+                wait_for_user_interaction()
                 return True
 
         for neighbor in current.neighbors:
@@ -231,6 +242,7 @@ def dijkstra_algorithm(draw, grid, start, end):
 
     path_targets = sort_targets(start, obj_spots + [end])
 
+    start_time = time.time()
     while not open_set.empty():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -260,7 +272,15 @@ def dijkstra_algorithm(draw, grid, start, end):
                 open_set.put((0, count, current))
                 open_set_hash = {current}
             else:
+                end_time = time.time()
+                elapsed_time = end_time - start_time
+                font = pygame.font.Font(None, 36)
+                text = font.render(f"Dijkstra: {elapsed_time:.6f} seconds", True, BLACK)
+                WIN.blit(text, (10, 10))
+                pygame.display.flip()
+                wait_for_user_interaction()
                 return True
+
 
         for neighbor in current.neighbors:
             if not neighbor.is_path():    
@@ -289,7 +309,7 @@ def bfs_algorithm(draw, grid, start, end):
 
     obj_spots = [spot for row in grid for spot in row if spot.is_obj]
 
-
+    start_time = time.time()
     while queue:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -303,7 +323,16 @@ def bfs_algorithm(draw, grid, start, end):
                             if spot.is_closed() or spot.is_open():
                                 spot.reset()
             reconstruct_path(came_from, end, draw)
+
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            font = pygame.font.Font(None, 36)
+            text = font.render(f"BFS: {elapsed_time:.6f} seconds", True, BLACK)
+            WIN.blit(text, (10, 10))
+            pygame.display.flip()
+            wait_for_user_interaction()
             return True
+
         
         # Check if the current node is an object node
         if current in obj_spots:
@@ -334,6 +363,15 @@ def bfs_algorithm(draw, grid, start, end):
             current.make_closed()
 
     return False
+
+
+def wait_for_user_interaction():
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN):
+                waiting = False
+
 
 def make_grid(rows, width):
     grid = []
