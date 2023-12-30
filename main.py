@@ -124,10 +124,15 @@ def reconstruct_path(came_from, current, draw):
                 total_cost += 1 #account for the rotation
                 moving_on_x = False #rotate the robot
         
+
         current = came_from[current]
-        if not current.is_start() or current.is_path():
+        if not current.is_start() and not current.is_path() and not current.is_end():
             current.make_path()
         draw()
+
+        if current.is_obj:
+            break
+        
     
     print("total_cost: ", total_cost)
 
@@ -265,11 +270,14 @@ def dijkstra_algorithm(draw, grid, start, end):
 
     return False
 
-
 def bfs_algorithm(draw, grid, start, end):
+
     queue = deque([start])
     came_from = {}
     visited = set([start])
+
+    obj_spots = [spot for row in grid for spot in row if spot.is_obj]
+
 
     while queue:
         for event in pygame.event.get():
@@ -277,25 +285,41 @@ def bfs_algorithm(draw, grid, start, end):
                 pygame.quit()
 
         current = queue.popleft()
-
-        if current == end:
+        if current == end and not obj_spots:
+            for row in grid:
+                    for spot in row:
+                        if not spot.is_obj and not spot.is_end() and not spot.is_start() and not spot.is_path():
+                            if spot.is_closed() or spot.is_open():
+                                spot.reset()
             reconstruct_path(came_from, end, draw)
             return True
+        
+        # Check if the current node is an object node
+        if current in obj_spots:
+            print("objektumot találtunk lelc")
+            obj_spots.remove(current)
+            for row in grid:
+                    for spot in row:
+                        if not spot.is_obj and not spot.is_end() and not spot.is_start() and not spot.is_path():
+                            if spot.is_closed() or spot.is_open():
+                                spot.reset()
+            reconstruct_path(came_from, current, draw)
+            queue = deque([current])
+            visited = set([start])
+            current.make_closed()
 
         for neighbor in current.neighbors:
-            if neighbor not in visited and not neighbor.is_obj:
+            if neighbor not in visited:
                 queue.append(neighbor)
                 visited.add(neighbor)
                 came_from[neighbor] = current
-                neighbor.make_open()
+                if not neighbor.is_obj and not neighbor.is_end() and not neighbor.is_start() and not neighbor.is_path():
+                    neighbor.make_open()
+                
 
-        # Check if the current node is an object node
-        if current.is_obj:
-            reconstruct_path(came_from, current, draw)
-            current.make_closed()
 
         draw()
-        if current != start and not current.is_obj:
+        if not current.is_obj and not current.is_end() and not current.is_start() and not current.is_path():
             current.make_closed()
 
     return False
