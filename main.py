@@ -172,7 +172,6 @@ def a_star_algorithm(draw, grid, start, end):
         current = open_set.get()[2]
         open_set_hash.remove(current)
         if current == path_targets[0]:
-            #path_targets[0].make_closed()
             reconstruct_path(came_from, current, draw)
             for row in grid:
                     for spot in row:
@@ -181,6 +180,12 @@ def a_star_algorithm(draw, grid, start, end):
                                 spot.reset()
                                 g_score[spot] = float("inf")
             path_targets = sort_targets(current, path_targets[1:])
+            for spot in path_targets:
+                if not spot.is_end():
+                    spot.make_obj()
+                    g_score[spot] = float("inf")
+                else:
+                    g_score[spot] = float("inf")
             if path_targets:
                 f_score[current] = h(current.get_pos(), path_targets[0].get_pos())
                 open_set = PriorityQueue()
@@ -207,7 +212,7 @@ def a_star_algorithm(draw, grid, start, end):
                         neighbor.make_open()
 
         draw()
-        if current != start and current != path_targets[0]:
+        if current != start and current not in path_targets:
             current.make_closed()
 
     return False
