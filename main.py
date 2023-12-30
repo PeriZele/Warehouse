@@ -349,7 +349,7 @@ def bfs_algorithm(draw, grid, start, end):
             current.make_closed()
 
         for neighbor in current.neighbors:
-            if neighbor not in visited:
+            if neighbor not in visited and not neighbor.is_path():
                 queue.append(neighbor)
                 visited.add(neighbor)
                 came_from[neighbor] = current
