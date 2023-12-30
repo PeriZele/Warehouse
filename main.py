@@ -423,6 +423,14 @@ def main(win, width):
                     end = None
                     grid = make_grid(ROWS, width)
 
+                if event.key == pygame.K_r:
+                    for row in grid:
+                        for spot in row:
+                            if not spot.is_obj and  not spot.is_barrier() and not spot.is_start() and not spot.is_end():
+                                spot.reset()
+                            elif spot.is_obj:
+                                spot.make_obj()
+
                 if event.key == pygame.K_o and start and end:
                     pos = pygame.mouse.get_pos()
                     row, col = get_clicked_pos(pos, ROWS, width)
