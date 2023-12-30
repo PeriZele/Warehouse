@@ -243,6 +243,12 @@ def dijkstra_algorithm(draw, grid, start, end):
                                 spot.reset()
                                 g_score[spot] = float("inf")
             path_targets = sort_targets(current, path_targets[1:])
+            for spot in path_targets:
+                if not spot.is_end():
+                    spot.make_obj()
+                    g_score[spot] = float("inf")
+                else:
+                    g_score[spot] = float("inf")
             g_score[current] = 0
             if path_targets:
                 open_set = PriorityQueue()
@@ -261,11 +267,11 @@ def dijkstra_algorithm(draw, grid, start, end):
                         count += 1
                         open_set.put((g_score[neighbor], count, neighbor))
                         open_set_hash.add(neighbor)
-                        if not neighbor.is_end():
+                        if not neighbor.is_end() and not neighbor.is_obj:
                             neighbor.make_open()
 
         draw()
-        if current != start and current != path_targets[0] and current != end:
+        if current != start and current not in path_targets and current != end:
             current.make_closed()
 
     return False
