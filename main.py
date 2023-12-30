@@ -137,7 +137,7 @@ def reconstruct_path(came_from, current, draw):
             break
         
     
-    print("total_cost: ", total_cost)
+    return total_cost
 
 
 
@@ -152,6 +152,7 @@ def sort_targets(current, targets):
     return sorted(targets, key=custom_sort)
 
 def a_star_algorithm(draw, grid, start, end):
+    total_cost = 0
     count = 0
     open_set = PriorityQueue()
     open_set.put((0, count, start))
@@ -176,7 +177,7 @@ def a_star_algorithm(draw, grid, start, end):
         current = open_set.get()[2]
         open_set_hash.remove(current)
         if current == path_targets[0]:
-            reconstruct_path(came_from, current, draw)
+            total_cost += reconstruct_path(came_from, current, draw)
             for row in grid:
                     for spot in row:
                         if not spot.is_obj and not spot.is_end() and not spot.is_start() and not spot.is_path():
@@ -201,8 +202,10 @@ def a_star_algorithm(draw, grid, start, end):
                 end_time = time.time()
                 elapsed_time = end_time - start_time
                 font = pygame.font.Font(None, 36)
-                text = font.render(f"A*: {elapsed_time:.6f} seconds", True, BLACK)
-                WIN.blit(text, (10, 10))
+                text_time = font.render(f"A*: {elapsed_time:.6f} seconds", True, BLACK)
+                WIN.blit(text_time, (10, 10))
+                text_cost = font.render(f"A*: {total_cost} steps", True, BLACK)
+                WIN.blit(text_cost, (10, 50))
                 pygame.display.flip()
                 wait_for_user_interaction()
                 return True
@@ -229,6 +232,7 @@ def a_star_algorithm(draw, grid, start, end):
     return False
 
 def dijkstra_algorithm(draw, grid, start, end):
+    total_cost = 0
     count = 0
     open_set = PriorityQueue()
     open_set.put((0, count, start))
@@ -252,7 +256,7 @@ def dijkstra_algorithm(draw, grid, start, end):
         open_set_hash.remove(current)
 
         if current == path_targets[0]:
-            reconstruct_path(came_from, current, draw)
+            total_cost += reconstruct_path(came_from, current, draw)
             for row in grid:
                     for spot in row:
                         if not spot.is_obj and not spot.is_end() and not spot.is_start() and not spot.is_path():
@@ -275,8 +279,10 @@ def dijkstra_algorithm(draw, grid, start, end):
                 end_time = time.time()
                 elapsed_time = end_time - start_time
                 font = pygame.font.Font(None, 36)
-                text = font.render(f"Dijkstra: {elapsed_time:.6f} seconds", True, BLACK)
-                WIN.blit(text, (10, 10))
+                text_time = font.render(f"Dijkstra: {elapsed_time:.6f} seconds", True, BLACK)
+                WIN.blit(text_time, (10, 10))
+                text_cost = font.render(f"Dijkstra: {total_cost} steps", True, BLACK)
+                WIN.blit(text_cost, (10, 50))
                 pygame.display.flip()
                 wait_for_user_interaction()
                 return True
@@ -302,7 +308,7 @@ def dijkstra_algorithm(draw, grid, start, end):
     return False
 
 def bfs_algorithm(draw, grid, start, end):
-
+    total_cost = 0
     queue = deque([start])
     came_from = {}
     visited = set([start])
@@ -322,17 +328,18 @@ def bfs_algorithm(draw, grid, start, end):
                         if not spot.is_obj and not spot.is_end() and not spot.is_start() and not spot.is_path():
                             if spot.is_closed() or spot.is_open():
                                 spot.reset()
-            reconstruct_path(came_from, end, draw)
+            total_cost += reconstruct_path(came_from, end, draw)
 
             end_time = time.time()
             elapsed_time = end_time - start_time
             font = pygame.font.Font(None, 36)
-            text = font.render(f"BFS: {elapsed_time:.6f} seconds", True, BLACK)
-            WIN.blit(text, (10, 10))
+            text_time = font.render(f"BFS: {elapsed_time:.6f} seconds", True, BLACK)
+            WIN.blit(text_time, (10, 10))
+            text_cost = font.render(f"BFS: {total_cost} steps", True, BLACK)
+            WIN.blit(text_cost, (10, 50))
             pygame.display.flip()
             wait_for_user_interaction()
             return True
-
         
         # Check if the current node is an object node
         if current in obj_spots:
@@ -343,7 +350,7 @@ def bfs_algorithm(draw, grid, start, end):
                         if not spot.is_obj and not spot.is_end() and not spot.is_start() and not spot.is_path():
                             if spot.is_closed() or spot.is_open():
                                 spot.reset()
-            reconstruct_path(came_from, current, draw)
+            total_cost += reconstruct_path(came_from, current, draw)
             queue = deque([current])
             visited = set([start])
             current.make_closed()
